@@ -1,0 +1,6 @@
+preempt_rt
+====
+
+Real-time drivers for bbb.
+Use spi-omap2-mcspi.c with default spidev.c
+

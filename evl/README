@@ -1,0 +1,16 @@
+evl_spi real-time driver for beaglebone black
+====
+
+  This directory contains EVL SPI real-time drivers
+for beaglebone black (am335x, OMAP4 mcspi).
+
+  The real-time driver was ported from Xenomai
+and the synchronization part was rewritten.
+spi-device.c is written afer its Xenomai counterpart and spidev.c.
+
+  spi-omap2-mcspi.c maximum SPI frequency is 40MHz.
+
+  For details, feel free to contact me:
+laurentiu [dot] duca [at] gmail [dot] com
+
+

@@ -1,0 +1,36 @@
+
+NET "clk" 	 LOC = "A8";
+
+NET "rst" LOC = "J13";
+NET "btn2" LOC = "K14";
+#NET "btn<0>" LOC = "J13";
+#NET "btn<1>" LOC = "K14";
+#NET "btn<2>" LOC = "K13";
+#NET "btn<3>" LOC = "K12";
+
+# rpi0
+#NET "SSEL" LOC = "T14";
+#NET "SCK" LOC = "R13";
+#NET "MISO" LOC = "T13";
+#NET "MOSI" LOC = "R12";
+#NET "SSEL2" LOC = "T12";
+#NET "interrupt" LOC="R11";
+#NET "interrupt_ack" LOC="P8";
+
+# bbb
+NET "SSEL" LOC = "D5";
+NET "SCK" LOC = "P9";
+NET "MISO" LOC = "A5";
+NET "MOSI" LOC = "A7";
+#NET "SSEL2" LOC = "A9";
+NET "interrupt" LOC="A12";
+NET "interrupt_ack" LOC="C10";
+
+NET "leds<0>" LOC = "L14";
+NET "leds<1>" LOC = "L13";
+NET "leds<2>" LOC = "M14";
+NET "leds<3>" LOC = "L12";
+NET "leds<4>" LOC = "N14";
+NET "leds<5>" LOC = "M13";
+NET "leds<6>" LOC = "P14";
+NET "leds<7>" LOC = "R16";

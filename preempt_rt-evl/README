@@ -1,0 +1,8 @@
+preempt_rt-evl
+====
+
+Real-time drivers for bbb
+ported from evl to preempt_rt.
+Disable bbb spi-omap2-mcspi and spidev drivers from kernel menu
+and use provided drivers.
+
