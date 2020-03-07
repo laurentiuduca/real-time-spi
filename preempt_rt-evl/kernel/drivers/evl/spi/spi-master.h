@@ -62,9 +62,6 @@ struct evl_spi_master {
 		struct list_head slaves;
 		struct list_head next;
 		raw_spinlock_t lock;
-		/* recommend one device per master to achieve real-time,
-		 * otherwise high priority threads starv each other.
-		 */
 		struct rt_mutex bus_lock;
 		struct evl_spi_remote_slave *cs;
 	};
