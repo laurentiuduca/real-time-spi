@@ -565,7 +565,7 @@ struct spi_controller {
 	struct completion               xfer_completion;
 	/* real-time signaling transfer complete */
 	struct swait_queue_head swait;
-	int message_transfered;
+	int xfer_done;
 
 	size_t				max_dma_len;
 

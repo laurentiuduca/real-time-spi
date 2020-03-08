@@ -1061,11 +1061,12 @@ static int spi_transfer_wait(struct spi_controller *ctlr,
 {
 	DECLARE_SWAITQUEUE(swait);
 
+	ctlr->xfer_done = 0;
 	/* wait for transfer completion using swait.h model */
 	for (;;) {
 		prepare_to_swait_exclusive(&ctlr->swait, &swait, TASK_INTERRUPTIBLE);
 		/* smp_mb() from set_current_state() */
-		if (ctlr->message_transfered)
+		if (ctlr->xfer_done)
 			break;
 		schedule();
 	}
@@ -1229,7 +1230,7 @@ out:
 void spi_finalize_current_transfer(struct spi_controller *ctlr)
 {
  	/* using swait.h model */
-	ctlr->message_transfered = 1;
+	ctlr->xfer_done	= 1;
 	smp_mb();
 	if (swait_active(&ctlr->swait))
 		swake_up_one(&ctlr->swait);
