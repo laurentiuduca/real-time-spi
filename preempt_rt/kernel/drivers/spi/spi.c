@@ -1061,7 +1061,7 @@ static int spi_transfer_wait(struct spi_controller *ctlr,
 {
 	DECLARE_SWAITQUEUE(swait);
 
-	ctlr->xfer_done = 0;
+	/* in the caller function must do ctlr->xfer_done = 0; */
 	/* wait for transfer completion using swait.h model */
 	for (;;) {
 		prepare_to_swait_exclusive(&ctlr->swait, &swait, TASK_INTERRUPTIBLE);
@@ -1157,6 +1157,8 @@ static int spi_transfer_one_message(struct spi_controller *ctlr,
 		spi_statistics_add_transfer_stats(stats, xfer, ctlr);
 
 		if (xfer->tx_buf || xfer->rx_buf) {
+			/* requested by spi_transfer_wait() */
+			ctlr->xfer_done	= 0;
 			ret = ctlr->transfer_one(ctlr, msg->spi, xfer);
 			if (ret < 0) {
 				SPI_STATISTICS_INCREMENT_FIELD(statm,
