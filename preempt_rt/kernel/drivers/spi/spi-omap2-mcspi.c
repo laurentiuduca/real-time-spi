@@ -887,12 +887,14 @@ static int do_transfer_irq_bh(struct spi_device *spi)
  	}
 	finish_swait(&mcspi->swait, &swait);
 
+#if 0
 	dev_warn(&spi->dev, 
 			"%s: tx_len=%d rx_len=%d n_interrupts=%d n_rx_full=%d n_tx_empty=%d\n",
 			__FUNCTION__,
 			mcspi->tx_len, mcspi->rx_len,
 		 	mcspi->n_interrupts, mcspi->n_rx_full, mcspi->n_tx_empty);
-
+#endif
+	
 	/* fifo can be enabled on a single channel */
 	omap2_mcspi_disable_fifo(spi);
 
