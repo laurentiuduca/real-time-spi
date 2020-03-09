@@ -795,9 +795,6 @@ static int omap2_mcspi_set_fifo_rt(struct spi_device *spi)
 
 	mcspi = spi_master_get_devdata(spi->master);
 
-#if 0
-	chconf = mcspi_read_reg(mcspi->master, OMAP2_MCSPI_CHCONF0);
-#endif
 	chconf = mcspi_cached_chconf0(spi);
 	bytes_per_word = 1; /* support only this mode */
 
@@ -845,12 +842,6 @@ static int do_transfer_irq_bh(struct spi_device *spi)
 	chconf &= ~OMAP2_MCSPI_CHCONF_TRM_MASK;
 	chconf &= ~OMAP2_MCSPI_CHCONF_TURBO;
 	mcspi_write_chconf0(spi, chconf);
-#if 0
-	chconf = mcspi_read_reg(mcspi->master, OMAP2_MCSPI_CHCONF0);
-	chconf &= ~OMAP2_MCSPI_CHCONF_TRM_MASK;
-	chconf &= ~OMAP2_MCSPI_CHCONF_TURBO;
-	mcspi_write_reg(mcspi->master, OMAP2_MCSPI_CHCONF0, chconf);
-#endif
 
 	/* fifo can be enabled on a single channel */
 	ret = omap2_mcspi_set_fifo_rt(spi);
@@ -1501,9 +1492,7 @@ static int omap2_mcspi_transfer_one(struct spi_master *master,
 		mcspi->spi = spi;
 		omap2_mcspi_set_enable(spi, 1);
 		count = do_transfer_irq(spi, t);
-#if 0
-		count = omap2_mcspi_txrx_pio(spi, t);
-#endif
+
 		if (count != t->len) {
 			status = -EIO;
 			goto out;
