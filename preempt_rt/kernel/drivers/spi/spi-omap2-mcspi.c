@@ -2,6 +2,10 @@
 /*
  * OMAP2 McSPI controller driver
  *
+ * Copyright (C) 2020, Laurentiu-Cristian Duca
+ *		laurentiu [dot] duca [at] gmail [dot] com
+ *		real-time driver using interrupts
+ *
  * Copyright (C) 2005, 2006 Nokia Corporation
  * Author:	Samuel Ortiz <samuel.ortiz@nokia.com> and
  *		Juha Yrj�l� <juha.yrjola@nokia.com>
