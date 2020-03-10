@@ -3,6 +3,9 @@
 //
 // Copyright (C) 2005 David Brownell
 // Copyright (C) 2008 Secret Lab Technologies Ltd.
+// Copyright (C) 2020, Laurentiu-Cristian Duca
+//		laurentiu [dot] duca [at] gmail [dot] com
+//		real-time driver using interrupts
 
 #include <linux/kernel.h>
 #include <linux/device.h>

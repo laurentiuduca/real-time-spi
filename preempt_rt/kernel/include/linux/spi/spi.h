@@ -1,4 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later
+ * Copyright (C) 2020, Laurentiu-Cristian Duca
+ *		laurentiu [dot] duca [at] gmail [dot] com
+ *		real-time driver using interrupts
  *
  * Copyright (C) 2005 David Brownell
  */
