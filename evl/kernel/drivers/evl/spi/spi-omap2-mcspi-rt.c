@@ -149,6 +149,7 @@ struct spi_master_omap2_mcspi {
 	int rx_len;
 	int fifo_depth;
 	struct evl_flag transfer_done;
+	struct evl_spinlock lock;
 	unsigned int pin_dir:1;
 	struct omap2_mcspi_cs cs[OMAP2_MCSPI_CS_N];
 	/* logging */
@@ -420,6 +421,24 @@ static void mcspi_wr_fifo(struct spi_master_omap2_mcspi *spim, int cs_id)
 	}
 }
 
+static void mcspi_wr_fifo_bh(struct spi_master_omap2_mcspi *spim, int cs_id)
+{
+	u8 byte;
+	int i;
+	unsigned long flags;
+	
+	evl_spin_lock_irqsave(&spim->lock, flags);
+	for (i = 0; i < spim->fifo_depth; i++) {
+		if (spim->tx_len <= 0)
+			byte = 0;
+		else
+			byte = spim->tx_buf ? *spim->tx_buf++ : 0;
+		mcspi_wr_cs_reg(spim, cs_id, OMAP2_MCSPI_TX0, byte);
+		spim->tx_len--;
+	}
+	evl_spin_unlock_irqrestore(&spim->lock, flags);
+}
+
 static irqreturn_t omap2_mcspi_interrupt(int irq, void *data)
 {
 	struct spi_master_omap2_mcspi *spim;
@@ -427,6 +446,8 @@ static irqreturn_t omap2_mcspi_interrupt(int irq, void *data)
 	int i, cs_id = 0;
 
 	spim = (struct spi_master_omap2_mcspi*) data;
+	evl_spin_lock(&spim->lock);
+	
 	for (i = 0; i < OMAP2_MCSPI_CS_N; i++)
 		if (spim->cs[i].chosen) {
 			cs_id = i;
@@ -458,6 +479,8 @@ static irqreturn_t omap2_mcspi_interrupt(int irq, void *data)
 		evl_raise_flag(&spim->transfer_done);
 	}
 
+	evl_spin_unlock(&spim->lock);
+	
 	return IRQ_HANDLED;
 }
 
@@ -512,7 +535,6 @@ static int omap2_mcspi_set_fifo(struct evl_spi_remote_slave *slave)
 
 	return 0;
 }
-
 
 static int do_transfer_irq_bh(struct evl_spi_remote_slave *slave)
 {
@@ -571,7 +593,7 @@ static int do_transfer_irq_bh(struct evl_spi_remote_slave *slave)
 	mcspi_wr_reg(spim, OMAP2_MCSPI_IRQENABLE, l);
 
 	/* TX_EMPTY will be raised only after data is transfered */
-	mcspi_wr_fifo(spim, slave->chip_select);
+	mcspi_wr_fifo_bh(spim, slave->chip_select);
 
 	/* wait for transfer completion */
 	ret = evl_wait_flag(&spim->transfer_done);
@@ -888,7 +910,8 @@ static int omap2_mcspi_probe(struct platform_device *pdev)
 
 	spim = container_of(master, struct spi_master_omap2_mcspi, master);
 	evl_init_flag(&spim->transfer_done);
-
+	evl_spin_lock_init(&spim->lock);
+	
 	spim->pin_dir = pin_dir;
 	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	spim->regs = devm_ioremap_resource(&pdev->dev, r);

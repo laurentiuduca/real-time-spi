@@ -30,7 +30,7 @@
 #include <linux/gcd.h>
 #include <linux/iopoll.h>
 #include <linux/swait.h>
-
+#include <linux/spinlock_types.h>
 #include <linux/spi/spi.h>
 #include <linux/gpio.h>
 
@@ -157,6 +157,7 @@ struct omap2_mcspi {
 	bool			slave_aborted;
 	unsigned int		pin_dir:1;
 	struct swait_queue_head swait;
+	raw_spinlock_t lock;
 	int interrupt_done;
 	unsigned char *rx_buf;
 	const unsigned char *tx_buf;
@@ -743,10 +744,31 @@ static void mcspi_wr_fifo(struct omap2_mcspi *mcspi)
 	}
 }
 
+static void mcspi_wr_fifo_bh(struct omap2_mcspi *mcspi)
+{
+	u8 byte;
+	int i;
+	unsigned long flags;
+
+	raw_spin_lock_irqsave(&mcspi->lock, flags);
+	/* load transmitter register to remove the source of the interrupt */
+	for (i = 0; i < mcspi->fifo_depth; i++) {
+		if (mcspi->tx_len <= 0)
+			byte = 0;
+		else
+			byte = mcspi->tx_buf ? *mcspi->tx_buf++ : 0;
+		mcspi_write_cs_reg(mcspi->spi, OMAP2_MCSPI_TX0, byte);
+		mcspi->tx_len--;
+	}
+	raw_spin_unlock_irqrestore(&mcspi->lock, flags);
+}
+
 static irqreturn_t omap2_mcspi_irq_handler_rt(int irq, void *dev_id) 
 {    
 	struct omap2_mcspi	*mcspi = dev_id;
 	u32 l;
+
+	raw_spin_lock(&mcspi->lock);
 
 	mcspi->n_interrupts++;
 	l = mcspi_read_reg(mcspi->master, OMAP2_MCSPI_IRQSTATUS);
@@ -776,6 +798,8 @@ static irqreturn_t omap2_mcspi_irq_handler_rt(int irq, void *dev_id)
 		if (swait_active(&mcspi->swait))
 			swake_up_one(&mcspi->swait);		
 	}
+
+	raw_spin_unlock(&mcspi->lock);
 
 	return IRQ_HANDLED;
 }
@@ -879,7 +903,7 @@ static int do_transfer_irq_bh(struct spi_device *spi)
 	mcspi_write_reg(mcspi->master, OMAP2_MCSPI_IRQENABLE, l);
 
 	/* TX_EMPTY will be raised only after SPI data is sent */
-	mcspi_wr_fifo(mcspi);
+	mcspi_wr_fifo_bh(mcspi);
 
 	/* wait for transfer completion using swait.h model */
 	for (;;) {
@@ -1717,6 +1741,8 @@ static int omap2_mcspi_probe(struct platform_device *pdev)
 
 	mcspi = spi_master_get_devdata(master);
 	mcspi->master = master;
+	init_swait_queue_head(&mcspi->swait);
+	raw_spin_lock_init(&mcspi->lock);
 
 	match = of_match_device(omap_mcspi_of_match, &pdev->dev);
 	if (match) {
@@ -1775,8 +1801,6 @@ static int omap2_mcspi_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "Cannot request IRQ");
 		goto free_master;
 	}
-
-	init_swait_queue_head(&mcspi->swait);
 
 	pm_runtime_use_autosuspend(&pdev->dev);
 	/* if delay is negative and the use_autosuspend flag is set

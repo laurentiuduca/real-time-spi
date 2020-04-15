@@ -423,7 +423,6 @@ static void mcspi_wr_fifo(struct spi_master_omap2_mcspi *spim, int cs_id)
 		mcspi_wr_cs_reg(spim, cs_id, OMAP2_MCSPI_TX0, byte);
 		spim->tx_len--;
 	}
-	trace_printk("spim->tx_len=%d\n", spim->tx_len);
 }
 
 static void mcspi_wr_fifo_from_bh(struct spi_master_omap2_mcspi *spim, int cs_id)
@@ -433,7 +432,6 @@ static void mcspi_wr_fifo_from_bh(struct spi_master_omap2_mcspi *spim, int cs_id
 	unsigned long flags;
 
 	raw_spin_lock_irqsave(&spim->lock, flags);
-	/* load transmitter register to remove the source of the interrupt */
 	for (i = 0; i < spim->fifo_depth; i++) {
 		if (spim->tx_len <= 0)
 			byte = 0;
@@ -442,7 +440,6 @@ static void mcspi_wr_fifo_from_bh(struct spi_master_omap2_mcspi *spim, int cs_id
 		mcspi_wr_cs_reg(spim, cs_id, OMAP2_MCSPI_TX0, byte);
 		spim->tx_len--;
 	}
-	trace_printk("spim->tx_len=%d\n", spim->tx_len);
 	raw_spin_unlock_irqrestore(&spim->lock, flags);
 }
 
@@ -453,7 +450,6 @@ static irqreturn_t omap2_mcspi_interrupt(int irq, void *data)
 	int i, cs_id = 0;
 
 	spim = (struct spi_master_omap2_mcspi*) data;	
-	/* take the lock */
 	raw_spin_lock(&spim->lock);
 	
 	for (i = 0; i < OMAP2_MCSPI_CS_N; i++)
@@ -490,9 +486,6 @@ static irqreturn_t omap2_mcspi_interrupt(int irq, void *data)
 		if (swait_active(&spim->swait))
 			swake_up_one(&spim->swait);
 	}
-
-	trace_printk("IRQ_HANDLED: cs_id=%d, spim=%px, spim->fifo_depth=%d, spim->tx_len=%d spim->rx_len=%d, spim->n_tx_empty=%d, spim->n_rx_full=%d\n",
-				 cs_id, spim, spim->fifo_depth, spim->tx_len, spim->rx_len, spim->n_tx_empty, spim->n_rx_full);
 
 	/* release the lock */
 	raw_spin_unlock(&spim->lock);
@@ -612,8 +605,6 @@ static int do_transfer_irq_bh(struct evl_spi_remote_slave *slave)
 	mcspi_wr_reg(spim, OMAP2_MCSPI_IRQENABLE, l);
 
 	/* TX_EMPTY will be raised only after data is transfered */
-	trace_printk("%s: \t call mcspi_wr_fifo(spim, slave->chip_select=%d) spim->tx_len=%d spim->rx_len=%d\n",
-				 __func__, slave->chip_select, spim->tx_len, spim->rx_len);
 	mcspi_wr_fifo_from_bh(spim, slave->chip_select);
 
 	/* wait for transfer completion using swait.h model */
@@ -628,11 +619,6 @@ static int do_transfer_irq_bh(struct evl_spi_remote_slave *slave)
 
 	omap2_mcspi_channel_enable(slave, 0);
 
-	trace_printk("%s: tx_len=%d rx_len=%d n_interrupts=%d n_rx_full=%d n_tx_empty=%d\n",
-			__FUNCTION__,
-			spim->tx_len, spim->rx_len,
-		 	spim->n_interrupts, spim->n_rx_full, spim->n_tx_empty);
-	
 	/* spim->tx_len and spim->rx_len should be 0 */
 	if (spim->tx_len || spim->rx_len)
 		return -EIO;
