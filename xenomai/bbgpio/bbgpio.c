@@ -448,7 +448,7 @@ static ssize_t bbgpio_read_rt(struct rtdm_fd *fd, void __user *buf, size_t size)
         //ret = rtdm_event_timedwait(&(data->irq_event), data->timeout, NULL);
 		ret = rtdm_event_wait(&(data->irq_event));
         if (ret < 0) {
-			trace_printk("%s(): error rtdm_event_wait\n", __func__);
+			rtdm_printk("%s(): error rtdm_event_wait\n", __func__);
             return ret;
         }
 
@@ -464,7 +464,7 @@ static ssize_t bbgpio_read_rt(struct rtdm_fd *fd, void __user *buf, size_t size)
             ret = rtdm_safe_copy_to_user(fd, buf, "0", 2);
         }
         if (ret < 0) {
-			trace_printk("%s(): error rtdm_safe_copy_to_user\n", __func__);
+			rtdm_printk("%s(): error rtdm_safe_copy_to_user\n", __func__);
             return ret;
         }
 		//trace_printk("%s(): val=%d\n", __func__, val);
