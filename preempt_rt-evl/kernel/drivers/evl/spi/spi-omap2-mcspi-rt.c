@@ -796,7 +796,7 @@ static void omap2_mcspi_mmap_release(struct evl_spi_remote_slave *slave)
 }
 
 static struct evl_spi_remote_slave *
-omap2_mcspi_attach_slave(struct evl_spi_master *master, struct spi_device *spi)
+omap2_mcspi_attach_slave(struct evl_spi_master *master, struct spi_device *spi, struct device *dev)
 {
 	struct spi_master_omap2_mcspi *spim;
 	struct spi_slave_omap2_mcspi *mapped_data;
@@ -813,7 +813,7 @@ omap2_mcspi_attach_slave(struct evl_spi_master *master, struct spi_device *spi)
 	if (mapped_data == NULL)
 		return ERR_PTR(-ENOMEM);
 
-	ret = evl_spi_add_remote_slave(&mapped_data->slave, master, spi);
+	ret = evl_spi_add_remote_slave(&mapped_data->slave, master, spi, dev);
 	if (ret) {
 		dev_err(&spi->dev, "%s: failed to attach slave\n", __func__);
 		kfree(mapped_data);

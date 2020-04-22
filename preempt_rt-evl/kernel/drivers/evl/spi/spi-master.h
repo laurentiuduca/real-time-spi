@@ -48,7 +48,8 @@ struct evl_spi_master_ops {
 			 void *rx, size_t len);
 	struct evl_spi_remote_slave *(*attach_slave)
 		(struct evl_spi_master *master,
-			struct spi_device *spi);
+		 struct spi_device *spi, 
+		 struct device *dev);
 	void (*detach_slave)(struct evl_spi_remote_slave *slave);
 };
 

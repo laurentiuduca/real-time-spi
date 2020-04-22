@@ -168,18 +168,23 @@ static const struct file_operations spidev_fops = {
 
 int evl_spi_add_remote_slave(struct evl_spi_remote_slave *slave,
 			      struct evl_spi_master *master,
-			      struct spi_device *spi)
+			      struct spi_device *spi, 
+				  struct device *dev)
 {
 	struct spi_master *kmaster = master->kmaster;
 	int ret;
 	unsigned long flags;
-	
+#if 0
+	static char a[3] = "aa";
+	a[0]++;
+#endif	
 	memset(slave, 0, sizeof(*slave));
 	slave->chip_select = spi->chip_select;
 	slave->config.bits_per_word = spi->bits_per_word;
 	slave->config.speed_hz = spi->max_speed_hz;
 	slave->config.mode = spi->mode;
 	slave->master = master;
+	slave->dev = dev;
 	
 	if (gpio_is_valid(spi->cs_gpio))
 		slave->cs_gpio = spi->cs_gpio;
@@ -286,7 +291,7 @@ static int spidev_probe(struct spi_device *spi)
 			if (ret)
 				return ret;
 		}
-		spidev->slave = master->ops->attach_slave(master, spi);
+		spidev->slave = master->ops->attach_slave(master, spi, dev);
 		spidev->slave->dev = dev;
 		if (IS_ERR(spidev->slave))
 			return PTR_ERR(spidev->slave);

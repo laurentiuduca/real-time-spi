@@ -53,7 +53,8 @@ struct evl_spidevice {
 
 int evl_spi_add_remote_slave(struct evl_spi_remote_slave *slave,
 			      struct evl_spi_master *spim,
-			      struct spi_device *spi);
+			      struct spi_device *spi,
+				  struct device *dev);
 
 void evl_spi_remove_remote_slave(struct evl_spi_remote_slave *slave);
 
