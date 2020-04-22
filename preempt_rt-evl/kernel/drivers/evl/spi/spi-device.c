@@ -174,10 +174,7 @@ int evl_spi_add_remote_slave(struct evl_spi_remote_slave *slave,
 	struct spi_master *kmaster = master->kmaster;
 	int ret;
 	unsigned long flags;
-#if 0
-	static char a[3] = "aa";
-	a[0]++;
-#endif	
+	
 	memset(slave, 0, sizeof(*slave));
 	slave->chip_select = spi->chip_select;
 	slave->config.bits_per_word = spi->bits_per_word;
