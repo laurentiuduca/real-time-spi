@@ -24,7 +24,7 @@ reg [31:0] int_ack_latency_cnt, next_int_ack_latency_cnt,
 reg [3:0] state, next_state;
 reg interrupt, next_interrupt;
 reg [31:0] cnt, next_cnt;
-parameter delay=(5*100*1000); // 10ms
+parameter delay=(2*5*10*1000); // 2ms
 
 // Debouncer
 `define DEB_LEN 10
@@ -72,8 +72,8 @@ single_pulse sp (.clk(clk), .rst_l(!rst), .ub(spi_output_valid), .ubsing(spi_out
 
 assign leds=
 	(btn2 == 0)
-		? {^byte_data_received, interrupt, int_ack_deb, ssel_deb, state[3], state[2], state[1], state[0]}
-		: cnt[7:0];
+		? {sck_deb, interrupt, int_ack_deb, ssel_deb, state[3], state[2], state[1], state[0]}
+		: {^byte_data_received, cnt[6:0]};
 
 always @(posedge clk or posedge rst)
 	if(rst) begin
@@ -130,8 +130,8 @@ always @(*) begin
 		end
 	end
 	2: begin
-		//if(ssel_deb) begin
-		if(ssel_deb || !sck_deb) begin
+		if(ssel_deb) begin
+		//if(ssel_deb || sck_deb) begin
 			next_spi_latency_cnt = spi_latency_cnt + 1;
 		end else begin
 			// little endian (LSB first)
@@ -156,8 +156,12 @@ always @(*) begin
 				next_byte_data_send = spi_latency_cnt[23:16];
 			else if(cnt == 7)
 				next_byte_data_send = spi_latency_cnt[31:24];
-			next_cnt = cnt + 1;
-		end else if((cnt >= 9)) begin //&& (ssel_deb == 1)) begin
+			if(cnt < 9)
+				next_cnt = cnt + 1;
+			/* when cnt is 7, set next_byte_data_send, 
+			 * increment cnt and wait for the last transfer 
+			 */
+		end else if((cnt >= 9) && (sck_deb == 0)) begin
 			next_cnt = 0;
 			next_state = 0;
 		end
