@@ -1,4 +1,5 @@
-/**
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
  * I/O handling lifted from drivers/spi/spi-omap2-mcspi.c:
  * Copyright (C) 2019 Laurentiu-Cristian Duca
  *  <laurentiu [dot] duca [at] gmail [dot] com>
@@ -429,7 +430,7 @@ static void mcspi_wr_fifo_bh(struct spi_master_omap2_mcspi *spim, int cs_id)
 	rtdm_lockctx_t c;
 
 	rtdm_lock_get_irqsave(&spim->lock, c);
-	
+
 	for (i = 0; i < spim->fifo_depth; i++) {
 		if (spim->tx_len <= 0)
 			byte = 0;
@@ -438,7 +439,7 @@ static void mcspi_wr_fifo_bh(struct spi_master_omap2_mcspi *spim, int cs_id)
 		mcspi_wr_cs_reg(spim, cs_id, OMAP2_MCSPI_TX0, byte);
 		spim->tx_len--;
 	}
-	
+
 	rtdm_lock_put_irqrestore(&spim->lock, c);
 }
 
@@ -450,7 +451,7 @@ static int omap2_mcspi_interrupt(rtdm_irq_t *irqh)
 
 	spim = rtdm_irq_get_arg(irqh, struct spi_master_omap2_mcspi);
 	rtdm_lock_get(&spim->lock);
-	
+
 	for (i = 0; i < OMAP2_MCSPI_CS_N; i++)
 		if (spim->cs[i].chosen) {
 			cs_id = i;
@@ -483,7 +484,7 @@ static int omap2_mcspi_interrupt(rtdm_irq_t *irqh)
 	}
 
 	rtdm_lock_put(&spim->lock);
-	
+
 	return RTDM_IRQ_HANDLED;
 }
 
@@ -931,7 +932,7 @@ static int omap2_mcspi_probe(struct platform_device *pdev)
 	spim = container_of(master, struct spi_master_omap2_mcspi, master);
 	rtdm_event_init(&spim->transfer_done, 0);
 	rtdm_lock_init(&spim->lock);
-	
+
 	spim->pin_dir = pin_dir;
 	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	spim->regs = devm_ioremap_resource(&pdev->dev, r);
