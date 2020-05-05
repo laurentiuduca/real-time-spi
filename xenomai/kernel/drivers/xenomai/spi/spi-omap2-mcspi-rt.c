@@ -1,5 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
-/*
+/**
  * I/O handling lifted from drivers/spi/spi-omap2-mcspi.c:
  * Copyright (C) 2019 Laurentiu-Cristian Duca
  *  <laurentiu [dot] duca [at] gmail [dot] com>

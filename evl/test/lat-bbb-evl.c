@@ -22,6 +22,7 @@
 // this is from uapi/evl/devices/spi.h
 #include <spi.h>
 #include <pthread.h>
+#include <time.h>
 
 #define DEBUG_APPLICATION 0
 #define debug_printf(pr_str) do { if (DEBUG_APPLICATION) evl_printf pr_str; } while(0) 
@@ -45,6 +46,9 @@ __u32 mode;
 int spi_fd = -1, int_dev_fd = -1, intack_dev_fd = -1;
 int efd;
 unsigned short int int_lat[EVL_N_TESTS], spi_lat[EVL_N_TESTS];
+struct timespec     ts1, ts2;
+float rtt_usec[EVL_N_TESTS], max_rtt_usec;
+
 FILE *f;
 
 /**
@@ -295,7 +299,9 @@ int main(int argc, char *argv[])
 		debug_printf(("Write from tx buffer...\n"));
 		tx_buffer[0] = 0; tx_buffer[1] = 1; tx_buffer[2] = 2; tx_buffer[3] = 3;
 		tx_buffer[4] = 0; tx_buffer[5] = 1; tx_buffer[6] = 2; tx_buffer[7] = 3;
+		clock_gettime(CLOCK_MONOTONIC, &ts1);
 		spi_write_and_read(8);
+		clock_gettime(CLOCK_MONOTONIC, &ts2);
 
 		for(i = 0; i < 8; i++)
 			debug_printf(("rx_buffer[%d]=%02x ", i, rx_buffer[i]));
@@ -310,22 +316,29 @@ int main(int argc, char *argv[])
 		mean += int_ack_latency * ((double)1.0/n);
 		int_lat[j] = int_ack_latency;
 		spi_lat[j] = spi_latency;
+		rtt_usec[j] = (ts2.tv_nsec > ts1.tv_nsec) ? 
+			(ts2.tv_nsec - ts1.tv_nsec) / 1000 :
+			(ts2.tv_nsec - ts1.tv_nsec + (1000*1000*1000)) / 1000;
+		if(rtt_usec[j] > max_rtt_usec)
+			max_rtt_usec = rtt_usec[j];
 		
 		j++;
 		/* feedback */
 		if(((j % 10000) == 0) || (j == n) || (j == 1000))
-			evl_printf("j=%d: max_int_ack_latency= %d => %.2fus (mean=%.2fus) max_spi_latency= %d => %.2fus \n", 
+			evl_printf("j=%d: max_int_ack_lat= %d => %.2fus (mean=%.2fus) max_spi_lat= %d => %.2fus max_rtt_usec=%.2fus\n",
 				j, max_int_ack_latency, ((double)max_int_ack_latency/FPGA_CLOCK_FREQ)*1E6, 
 				(mean/FPGA_CLOCK_FREQ)*1E6,
-				max_spi_latency, ((double)max_spi_latency/FPGA_CLOCK_FREQ)*1E6);
+				max_spi_latency, ((double)max_spi_latency/FPGA_CLOCK_FREQ)*1E6,
+				max_rtt_usec);
+
 	} while(j < n);
 
 	/* write latency data to file */
 	f = fopen("latency.csv", "w");
 	if(f != NULL) {
 		for (j = 0; j < n; j++)
-			fprintf(f, "%.2f, %.2f\n",
-					int_lat[j]*((double)1E6/FPGA_CLOCK_FREQ), spi_lat[j]*((double)1E6/FPGA_CLOCK_FREQ));
+			fprintf(f, "%.2f, %.2f, %.2f\n",
+					int_lat[j]*((double)1E6/FPGA_CLOCK_FREQ), spi_lat[j]*((double)1E6/FPGA_CLOCK_FREQ), rtt_usec[j]);
 		fclose(f);
 	} else {
 		printf("fopen error\n");
