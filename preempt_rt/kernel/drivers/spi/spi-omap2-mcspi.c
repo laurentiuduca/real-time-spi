@@ -1736,7 +1736,8 @@ static int omap2_mcspi_probe(struct platform_device *pdev)
 	master->dev.of_node = node;
 	master->max_speed_hz = OMAP2_MCSPI_MAX_FREQ;
 	master->min_speed_hz = OMAP2_MCSPI_MAX_FREQ >> 15;
-
+	init_swait_queue_head(&master->swait);
+	
 	platform_set_drvdata(pdev, master);
 
 	mcspi = spi_master_get_devdata(master);
