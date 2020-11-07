@@ -3,6 +3,12 @@ Real-time SPI on beaglebone black and raspberry pi zero w
 
 Please see each folder's README.
 
+If you use this work, please cite the following paper:
+L. -C. Duca, A. Duca and A. -S. Lup, 
+"Real-time Linux drivers and latency evaluation system for TI OMAP4 mcSPI peripheral," 
+2020 International Conference on Electrical, Communication, and Computer Engineering (ICECCE), 
+Istanbul, Turkey, 2020, pp. 1-4, doi: 10.1109/ICECCE49384.2020.9179286.
+
 For more info, please contact me:
 laurentiu [dot] duca [at] gmail [dot] com
 
