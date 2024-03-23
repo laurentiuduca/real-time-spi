@@ -182,14 +182,14 @@ int evl_spi_add_remote_slave(struct evl_spi_remote_slave *slave,
 	slave->config.mode = spi->mode;
 	slave->master = master;
 	slave->dev = dev;
-	
-	if (gpio_is_valid(spi->cs_gpio))
-		slave->cs_gpio = spi->cs_gpio;
-	else {
-		slave->cs_gpio = -ENOENT;
-		if (kmaster->cs_gpios)
-			slave->cs_gpio = kmaster->cs_gpios[spi->chip_select];
-	}
+
+    if(spi->cs_gpiod && gpio_is_valid(desc_to_gpio(spi->cs_gpiod)))
+    	slave->cs_gpio = desc_to_gpio(spi->cs_gpiod);
+   	else {
+    	slave->cs_gpio = -ENOENT;
+	    if (kmaster->cs_gpiods)
+		    slave->cs_gpio = desc_to_gpio(kmaster->cs_gpiods[spi->chip_select]);
+   	}
 
 	if (gpio_is_valid(slave->cs_gpio)) {
 		ret = gpio_request(slave->cs_gpio, slave->dev->kobj.name);
@@ -197,7 +197,8 @@ int evl_spi_add_remote_slave(struct evl_spi_remote_slave *slave,
 			goto fail;
 		slave->cs_gpiod = gpio_to_desc(slave->cs_gpio);
 		if (slave->cs_gpiod == NULL) {
-			ret = -EINVAL;
+			printk(KERN_ERR "evl_spi_add_remote_slave cs_gpio invalid\n");
+            ret = -EINVAL;
 			goto fail;
 		}
 	}
@@ -304,7 +305,7 @@ static int spidev_probe(struct spi_device *spi)
 	return status;
 }
 
-static int spidev_remove(struct spi_device *spi)
+static void spidev_remove(struct spi_device *spi)
 {
 	spidev_t	*spidev = spi_get_drvdata(spi);
 
@@ -316,8 +317,6 @@ static int spidev_remove(struct spi_device *spi)
 	if (spidev->users == 0)
 		kfree(spidev);
 	mutex_unlock(&device_list_lock);
-
-	return 0;
 }
 
 static struct spi_driver spidev_spi_driver = {
@@ -364,6 +363,8 @@ static int __init spidev_init(void)
 		class_destroy(spidev_class);
 		unregister_chrdev(major, spidev_spi_driver.driver.name);
 	}
+
+    printk(KERN_NOTICE "spidev_init returns %d\n", status);
 	return status;
 }
 module_init(spidev_init);

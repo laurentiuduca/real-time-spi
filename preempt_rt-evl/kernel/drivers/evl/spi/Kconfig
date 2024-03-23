@@ -1,8 +1,11 @@
 menu "Real-time SPI master drivers"
 
 config EVL_DRIVERS_SPI
-       depends on SPI
-       tristate
+    select SPI
+    tristate 
+    help
+
+    EVL_DRIVERS_SPI
 
 config EVL_DRIVERS_SPI_BCM2835
 	depends on ARCH_BCM2708 || ARCH_BCM2835

@@ -383,7 +383,12 @@ void evl_spi_remove_master(struct evl_spi_master *master)
 {
 	kfree(master->tx_buf);
 	kfree(master->rx_buf);
-	rt_mutex_destroy(&master->bus_lock);
+	//rt_mutex_destroy(&master->bus_lock); // not available
+    //WARN_ON(rt_mutex_is_locked(master->bus_lock));
+    #ifdef CONFIG_DEBUG_RT_MUTEXES
+        master->bus_lock->magic = NULL;
+    #endif
+
 	spi_unregister_master(master->kmaster);
 }
 EXPORT_SYMBOL_GPL(evl_spi_remove_master);

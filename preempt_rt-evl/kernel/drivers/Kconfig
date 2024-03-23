@@ -6,6 +6,7 @@ menu "Device Drivers"
 source "drivers/amba/Kconfig"
 source "drivers/eisa/Kconfig"
 source "drivers/pci/Kconfig"
+source "drivers/cxl/Kconfig"
 source "drivers/pcmcia/Kconfig"
 source "drivers/rapidio/Kconfig"
 
@@ -15,6 +16,8 @@ source "drivers/base/Kconfig"
 source "drivers/bus/Kconfig"
 
 source "drivers/connector/Kconfig"
+
+source "drivers/firmware/Kconfig"
 
 source "drivers/gnss/Kconfig"
 
@@ -31,8 +34,6 @@ source "drivers/block/Kconfig"
 source "drivers/nvme/Kconfig"
 
 source "drivers/misc/Kconfig"
-
-source "drivers/ide/Kconfig"
 
 source "drivers/scsi/Kconfig"
 
@@ -52,8 +53,6 @@ source "drivers/net/Kconfig"
 
 source "drivers/isdn/Kconfig"
 
-source "drivers/lightnvm/Kconfig"
-
 # input before char - char/joystick depends on it. As does USB.
 
 source "drivers/input/Kconfig"
@@ -65,6 +64,7 @@ source "drivers/i2c/Kconfig"
 source "drivers/i3c/Kconfig"
 
 source "drivers/spi/Kconfig"
+
 source "drivers/evl/Kconfig"
 
 source "drivers/spmi/Kconfig"
@@ -109,6 +109,8 @@ source "drivers/usb/Kconfig"
 
 source "drivers/mmc/Kconfig"
 
+source "drivers/ufs/Kconfig"
+
 source "drivers/memstick/Kconfig"
 
 source "drivers/leds/Kconfig"
@@ -139,11 +141,17 @@ source "drivers/virt/Kconfig"
 
 source "drivers/virtio/Kconfig"
 
+source "drivers/vdpa/Kconfig"
+
+source "drivers/vhost/Kconfig"
+
 source "drivers/hv/Kconfig"
 
 source "drivers/xen/Kconfig"
 
 source "drivers/greybus/Kconfig"
+
+source "drivers/comedi/Kconfig"
 
 source "drivers/staging/Kconfig"
 
@@ -177,8 +185,6 @@ source "drivers/iio/Kconfig"
 
 source "drivers/ntb/Kconfig"
 
-source "drivers/vme/Kconfig"
-
 source "drivers/pwm/Kconfig"
 
 source "drivers/irqchip/Kconfig"
@@ -201,6 +207,8 @@ source "drivers/thunderbolt/Kconfig"
 
 source "drivers/android/Kconfig"
 
+source "drivers/gpu/trace/Kconfig"
+
 source "drivers/nvdimm/Kconfig"
 
 source "drivers/dax/Kconfig"
@@ -219,8 +227,6 @@ source "drivers/mux/Kconfig"
 
 source "drivers/opp/Kconfig"
 
-source "drivers/visorbus/Kconfig"
-
 source "drivers/siox/Kconfig"
 
 source "drivers/slimbus/Kconfig"
@@ -228,5 +234,11 @@ source "drivers/slimbus/Kconfig"
 source "drivers/interconnect/Kconfig"
 
 source "drivers/counter/Kconfig"
+
+source "drivers/most/Kconfig"
+
+source "drivers/peci/Kconfig"
+
+source "drivers/hte/Kconfig"
 
 endmenu

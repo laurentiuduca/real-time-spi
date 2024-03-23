@@ -1,4 +1,4 @@
-menu "Out-of-band device drivers"
+menu "EVL device drivers"
 
 #config EVL_LATMUS
 #	bool "Timer latency calibration and measurement"

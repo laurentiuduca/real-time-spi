@@ -6,6 +6,8 @@
  *
  * RTDM integration by:
  * Copyright (C) 2016 Philippe Gerum <rpm@xenomai.org>
+ * 
+ * Copyright (C) 2021 Laurentiu-Cristian Duca
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -455,10 +457,14 @@ static int find_cs_gpio(struct spi_device *spi)
 	struct device_node *pins;
 	struct gpio_chip *chip;
 	int ret;
+    int cs_gpio = -1;
 
-	if (gpio_is_valid(spi->cs_gpio)) {
+    if(spi->cs_gpiod != NULL)
+        cs_gpio = desc_to_gpio(spi->cs_gpiod);
+
+	if (gpio_is_valid(cs_gpio)) {
 		dev_info(&spi->dev, "using GPIO%i for CS%d\n",
-			 spi->cs_gpio, spi->chip_select);
+			 cs_gpio, spi->chip_select);
 		return 0;
 	}
 
@@ -474,7 +480,8 @@ static int find_cs_gpio(struct spi_device *spi)
 			     (pin == 8 || pin == 36 || pin == 46)) ||
 			    (spi->chip_select == 1 &&
 			     (pin == 7 || pin == 35))) {
-				spi->cs_gpio = pin;
+				spi->cs_gpiod = gpio_to_desc(pin);
+                cs_gpio = pin;
 				break;
 			}
 		}
@@ -482,24 +489,25 @@ static int find_cs_gpio(struct spi_device *spi)
 	}
 
 	/* If that failed, assume GPIOs 7-11 are used */
-	if (!gpio_is_valid(spi->cs_gpio) ) {
+	if (!gpio_is_valid(cs_gpio) ) {
 		chip = gpiochip_find("pinctrl-bcm2835", gpio_match_name);
 		if (chip == NULL)
 			return 0;
 
-		spi->cs_gpio = chip->base + 8 - spi->chip_select;
+		cs_gpio = chip->base + 8 - spi->chip_select;
+        spi->cs_gpiod = gpio_to_desc(cs_gpio);
 	}
 
 	dev_info(&spi->dev,
 		 "setting up native-CS%i as GPIO %i\n",
-		 spi->chip_select, spi->cs_gpio);
+		 spi->chip_select, cs_gpio);
 
-	ret = gpio_direction_output(spi->cs_gpio,
+	ret = gpio_direction_output(cs_gpio,
 			    (spi->mode & SPI_CS_HIGH) ? 0 : 1);
 	if (ret) {
 		dev_err(&spi->dev,
 			"could not set CS%i gpio %i as output: %i",
-			spi->chip_select, spi->cs_gpio, ret);
+			spi->chip_select, cs_gpio, ret);
 		return ret;
 	}
 
@@ -507,7 +515,7 @@ static int find_cs_gpio(struct spi_device *spi)
 	 * Force value on GPIO in case the pin controller does not
 	 * handle that properly when switching to output mode.
 	 */
-	gpio_set_value(spi->cs_gpio, (spi->mode & SPI_CS_HIGH) ? 0 : 1);
+	gpio_set_value(cs_gpio, (spi->mode & SPI_CS_HIGH) ? 0 : 1);
 
 	return 0;
 }

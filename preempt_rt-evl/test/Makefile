@@ -1,7 +1,9 @@
 # Tested with linaro toolchain (gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf)
 #CC = /home/laur/lucru/raspberry-pi/robertcnelson/ti-linux-kernel-dev/dl/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc
+#CC = /home/laur/lucru/raspberry-pi/rpi-zero-w/armv6-eabihf--glibc--bleeding-edge-2021.11-1/bin/arm-linux-gcc
 CC = arm-linux-gnueabihf-gcc
-KERNEL_DIR := /home/laur/lucru/raspberry-pi/robertcnelson/ti-linux-kernel-dev/ignore/linux-5.4.5
+KERNEL_DIR := /home/laur/lucru/raspberry-pi/rpi-zero-w/linux-6.1.70
+#/home/laur/lucru/raspberry-pi/rpi-zero-w/linux-rpi
 CFLAGS = -I$(KERNEL_DIR)/include/uapi/evl/devices
 
 all: lat-preempt_rt-evl.out spitest-laur.out
