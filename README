@@ -1,12 +1,11 @@
 Real-time SPI on beaglebone black and raspberry pi 0,1,2,3,4,5
 ====
 
- 
+preempt_rt-evl is a real-time spi core for linux 6.1 with preempt rt 
 
  > Device Drivers > EVL device drivers > Real-time SPI master drivers ────────────────────────────────────────────────────────────────────────────────
   │ │                                   <*> Support for BCM2835 SPI                                                                              │ │  
   │ │                                   [*] Enable SPI core debugging features
-Please see each folder's README.
 
 If you use this work, please cite the following paper:
 L. -C. Duca, A. Duca and A. -S. Lup, 
