@@ -1,8 +1,0 @@
-preempt_rt
-====
-
-Real-time drivers for beaglebone black.
-Use spi-omap2-mcspi.c with spi.h/c
-and with default spidev.c
-Please also see the test and fpga folders.
-
